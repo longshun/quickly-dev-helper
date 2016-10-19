@@ -1,0 +1,36 @@
+	class MyAdapter extends PagerAdapter {
+		@Override
+		public int getCount() {
+			return Integer.MAX_VALUE;
+		}
+
+		/**
+		 * 复用对象.
+		 * true 复用对象
+		 * false 用的是object
+		 */
+		@Override
+		public boolean isViewFromObject(View arg0, Object arg1) {
+			return arg0 == arg1;
+		}
+
+		/**
+		 * 销毁对象
+		 * @param position 将要被销毁对象的索引位置
+		 */
+		@Override
+		public void destroyItem(ViewGroup container, int position, Object object) {
+			container.removeView(imageViewList.get(position % imageViewList.size()));
+		}
+
+		/**
+		 * 初始化一个view对象
+		 * @param position 将要被创建的对象的索引位置
+		 */
+		@Override
+		public Object instantiateItem(ViewGroup container, int position) {
+			// 先把对象添加到viewpager中, 再返回当前对象
+			container.addView(imageViewList.get(position % imageViewList.size()));
+			return imageViewList.get(position % imageViewList.size());
+		}
+	}

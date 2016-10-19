@@ -1,0 +1,86 @@
+package com.longshun.animationdemo.zhufengfm.zhufengfm.adapters;
+
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.view.PagerAdapter;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.*;
+import com.longshun.animationdemo.zhufengfm.zhufengfm.activitys.AdvertiseIntoActivity;
+import com.longshun.animationdemo.zhufengfm.zhufengfm.entitys.discover.recommend.FocusImage;
+import com.longshun.animationdemo.zhufengfm.zhufengfm.tasks.ImageLoadTask;
+
+import java.util.List;
+
+/**
+ * Created by LongShun on 2015/9/27.
+ * Author:LongShun
+ * Email:1261972397@qq.com
+ */
+public class ViewPagerImagesAdapter extends PagerAdapter {
+
+    private Context context;
+    private List<FocusImage> focusImages;//包含图片地址的实体
+
+    public ViewPagerImagesAdapter(Context context, List<FocusImage> focusImages) {
+        this.context = context;
+        this.focusImages = focusImages;
+    }
+
+    @Override
+    public Object instantiateItem(ViewGroup container, int position) {
+        //1.显示图片
+        ImageView imageView = new ImageView(context);
+        imageView.setId(position);//设置id，以便获取相应的图片对象
+        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        //得到要显示的焦点图片的地址
+        String picUrl = focusImages.get(position).getPic();
+        //开启异步任务加载图片到ImageView上
+        ImageLoadTask task = new ImageLoadTask(imageView);
+        task.execute(picUrl);
+        //2.监听事件
+        imageView.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                int id = v.getId();
+                Intent intent = null;
+                switch (id){
+                    case 0:
+                        //todo
+                        intent = new Intent(context, AdvertiseIntoActivity.class);
+                        break;
+                    case 1:
+                        intent = new Intent(context, AdvertiseIntoActivity.class);
+                        break;
+                   
+                }
+                context.startActivity(intent);
+            }
+        });
+        container.addView(imageView);
+        return imageView;
+    }
+
+    @Override
+    public int getCount() {
+        int count = 0;
+        if (focusImages != null && focusImages.size() > 0) {
+            count = focusImages.size();
+        }
+        return count;
+    }
+
+    @Override
+    public boolean isViewFromObject(View view, Object object) {
+        return view == object;
+    }
+
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        if (object instanceof View) {
+            View view = (View) object;
+            container.removeView(view);
+        }
+    }
+}

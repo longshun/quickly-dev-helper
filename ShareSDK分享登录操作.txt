@@ -1,0 +1,41 @@
+---------分享-----------
+1.ShareSDK上新建应用，得到一个appkey和AppSecret以及RedirectUrl（非必须）；
+2.在要分享的平台新建应用，得到appkey和AppSecret；
+3.下载ShareSDK；
+4.解压看到ShareSDK for Android目录下的QuickIntegrater.jar，用java运行；
+5.输入我们项目的包名，生成对应目录；
+6.把对应目录下的文件复制到我们的工程中；
+7.对于src下的目录，在Android studio中复制到src——》main-》java目录下，刷新gradle；
+8.编辑assets目录下的ShareSDK.xml，把ShareSDK的appKey还有其他平台的的appkey都填上；
+9.如果需要分享需要调用下面方法：
+private void showShare() {
+        ShareSDK.initSDK(this);
+        OnekeyShare oks = new OnekeyShare();
+        //关闭sso授权
+        oks.disableSSOWhenAuthorize();
+
+        // 分享时Notification的图标和文字  2.5.9以后的版本不调用此方法
+        //oks.setNotification(R.drawable.ic_launcher, getString(R.string.app_name));
+        // title标题，印象笔记、邮箱、信息、微信、人人网和QQ空间使用
+        //oks.setTitle(getString(R.string.share));
+        oks.setTitle("大保健分享");
+        // titleUrl是标题的网络链接，仅在人人网和QQ空间使用
+        oks.setTitleUrl("http://sharesdk.cn");
+        // text是分享文本，所有平台都需要这个字段
+        oks.setText("请输入要分享的内容");
+        // imagePath是图片的本地路径，Linked-In以外的平台都支持此参数
+        //oks.setImagePath("/sdcard/test.jpg");//确保SDcard下面存在此张图片
+        // url仅在微信（包括好友和朋友圈）中使用
+        oks.setUrl("http://sharesdk.cn");
+        // comment是我对这条分享的评论，仅在人人网和QQ空间使用
+        oks.setComment("请输入要评论的内容");
+        // site是分享此内容的网站名称，仅在QQ空间使用
+        oks.setSite(getString(R.string.app_name));
+        // siteUrl是分享此内容的网站地址，仅在QQ空间使用
+        oks.setSiteUrl("http://sharesdk.cn");
+
+        // 启动分享GUI
+        oks.show(this);
+    }
+
+10.如果要登录，那么

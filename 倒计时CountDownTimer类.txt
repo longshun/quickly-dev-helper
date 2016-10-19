@@ -1,0 +1,42 @@
+------CountDownTimer------
+1.构造方法
+ public CountDownTimer (long millisInFuture, long countDownInterval)
+
+参数
+millisInFuture  从开始调用start()到倒计时完成并onFinish()方法被调用的毫秒数，也就是倒计时的总时间。（单位毫秒）
+countDownInterval  onTick(long)回调的间隔时间。也就是多少每隔多少秒调用一下该函数（单位毫秒）
+
+2.开启一个倒计时的具体用法：
+
+new CountdownTimer(30000, 1000) {//30000ms=30s,倒计时30s；//1000ms=1s，每隔一秒调用onTick实现倒计时变化效果
+
+     public void onTick(long millisUntilFinished) {
+
+         mTextField.setText("seconds remaining: " + millisUntilFinished / 1000);
+
+     }
+
+     public void onFinish() {
+
+         mTextField.setText("done!");
+
+     }
+
+ }.start(); 
+
+3.主要方法
+
+启动倒计时
+public synchronized final CountDownTimer start ()
+
+取消倒计时（取消后，再次启动会重新开始倒计时）
+public final void cancel ()        
+
+倒计时完成时被调用                      
+public abstract void onFinish () 
+
+固定间隔被调用，参数millisUntilFinished   倒计时剩余时间。
+public abstract void onTick (long millisUntilFinished)
+
+
+         

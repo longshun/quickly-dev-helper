@@ -1,0 +1,18 @@
+setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+setRequestedOrientation 参数说明
+
+系统默认
+ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+锁定直式
+ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+锁定横式
+ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+随使用者当下
+ActivityInfo.SCREEN_ORIENTATION_USER
+与活动线程下相同的设定
+ActivityInfo.SCREEN_ORIENTATION_BEHIND
+不随SENSOR改变
+ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
+随SENSOR改变
+ActivityInfo.SCREEN_ORIENTATION_SENSOR

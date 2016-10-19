@@ -1,0 +1,15 @@
+//序列化---把内存中对象的状态(可以序列化的属性，不包括方法)保存到文件中；
+//1.transient和static修饰的属性不会被保存到文件中；
+//2.被序列化的对象实现了Serializable接口；
+
+//序列化--把对象状态保存到文件中
+String filePath = "xxx";//文件路径
+FileOutputStream fos = new FileOutputStream(filePath); 
+ObjectOutputStream oos = new ObjectOutputStream(fos); 
+oos.writeObject(object);//前提是这个对象必须实现了Serializable接口； 
+
+//反序列化--从文件中读取对象状态
+FileInputStream fis = new FileInputStream(filePath);
+ObjectInputStream ois = new ObjectInputStream(fis);
+Object object = ois.readObject();
+
