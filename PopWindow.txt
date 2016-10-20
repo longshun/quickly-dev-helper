@@ -1,0 +1,54 @@
+	private void createWindowShowShopCar() {
+        View view = LayoutInflater.from(this).inflate(R.layout.window_shop_car, null);
+        mPopWindow = new PopupWindow(view, 1, 1);
+        mPopWindow.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
+        mPopWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+		//测量view 注意这里，如果没有测量  ，下面的popupHeight高度为-2  ,因为LinearLayout.LayoutParams.WRAP_CONTENT这句自适应造成的
+        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        //  获取测量后的宽度
+        popupWidth = view.getMeasuredWidth();
+        //获取测量后的高度
+        popupHeight = view.getMeasuredHeight();
+        mPopWindow.setFocusable(true);
+        //用户点击PopWindow其他地方或者返回键，PopWindow消失
+        mPopWindow.setBackgroundDrawable(new PaintDrawable());
+        mPopWindow.setOnDismissListener(this);
+    }
+	
+	private void showPopWindow(PopupWindow mPopWindow){
+        if (mPopWindow != null) {
+            setBgAlpha(0.6f);
+            layoutBottomLocation = new int[2];
+            layoutBottom.getLocationOnScreen(layoutBottomLocation);
+            mPopWindow.showAsDropDown(layoutBottom,0, layoutBottomLocation[1]-mPopWindow.getHeight());
+        }
+    }
+
+    /*关闭PopWindow并且把背景设为全透明*/
+    private void closePopWindow() {
+        mPopWindow.dismiss();
+    }
+
+    /*popWindow消失*/
+    @Override
+    public void onDismiss() {
+        setBgAlpha(1);
+    }
+
+	/*背景透明度*/
+    private void setBgAlpha(float alpha) {
+        WindowManager.LayoutParams params = this.getWindow().getAttributes();
+        params.alpha = alpha;
+        this.getWindow().setAttributes(params);
+    }
+	
+	case R.id.iv_shop_car:
+                if (mPopWindow==null){
+                    createWindowShowShopCar();
+                    showPopWindow(mPopWindow);
+                }else if (mPopWindow.isShowing()){
+                    closePopWindow();
+                }else if (!mPopWindow.isShowing()){
+                    showPopWindow(mPopWindow);
+                }
+                break;
