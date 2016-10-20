@@ -11,7 +11,9 @@
         popupHeight = view.getMeasuredHeight();
         mPopWindow.setFocusable(true);
         //用户点击PopWindow其他地方或者返回键，PopWindow消失
-        mPopWindow.setBackgroundDrawable(new PaintDrawable());
+		//setBackgroundDrawable(new BitmapDrawable());用这种会出现设置的布局布局背景黑色的问题
+		//背景不为空但是完全透明。推荐用这种
+        mPopWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));
         mPopWindow.setOnDismissListener(this);
     }
 	
@@ -52,3 +54,7 @@
                     showPopWindow(mPopWindow);
                 }
                 break;
+				
+	其实一直觉得很奇怪，不明白为什么一个背景会影响点击事件，只知道这样用可行。
+	原因：如果有背景，则会在contentView外面包一层PopupViewContainer之后作为mPopupView，如果没有背景，则直接用contentView作为mPopupView。
+而这个PopupViewContainer是一个内部私有类，它继承了FrameLayout，在其中重写了Key和Touch事件的分发处理
