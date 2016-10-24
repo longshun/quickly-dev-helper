@@ -1,0 +1,78 @@
+	private IWXAPI iwxapi;
+	private PayReq payReq;
+
+	private void startWxPay() {
+        regToWx();
+        prePayReqParams();
+        iwxapi.sendReq(payReq);
+    }
+	
+	private void regToWx() {
+        iwxapi = WXAPIFactory.createWXAPI(this, PayConstants.WX_APP_ID);
+        iwxapi.registerApp(PayConstants.WX_APP_ID);
+    }
+	
+	private void prePayReqParams() {
+        payReq = new PayReq();
+        payReq.appId = PayConstants.WX_APP_ID;//应用appId
+        payReq.partnerId = PayConstants.MCH_ID;//商户id
+        payReq.prepayId = "";// TODO: 2016/10/24//预付id,服务器给出
+        payReq.packageValue = "Sign=WXPay";//固定值
+        payReq.nonceStr = getNonceStr();//随机字符串
+        Log.d("wx", "nonceStr: "+payReq.nonceStr);
+        payReq.timeStamp = String.valueOf(getTimeStamp());//时间戳s
+        Log.d("wx", "timeStamp: "+payReq.timeStamp);
+        payReq.sign = genAppSign();//签名
+        Log.d("wx", "sign: "+payReq.sign);
+    }
+	//拼接的字段要按照字典顺序排序appid noncestr
+	private String genAppSign() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("appid=").append(payReq.appId).append("&");
+        sb.append("noncestr=").append(payReq.nonceStr).append("&");
+        sb.append("package=").append(payReq.packageValue).append("&");
+        sb.append("partnerid=").append(payReq.partnerId).append("&");
+        sb.append("prepayid=").append(payReq.prepayId).append("&");
+        sb.append("timestamp=").append(payReq.timeStamp).append("&");
+        sb.append("key=").append(PayConstants.API_KEY);//商户APIKEY
+        Log.d("wx", "genAppSign:"+sb.toString());
+        return MD5Utils.getMessageDigest(sb.toString().getBytes()).toUpperCase();//微信要大写的
+    }
+
+    private String getNonceStr() {
+        Random random = new Random();
+        return MD5Utils.getMessageDigest(String.valueOf(random.nextInt(10000)).getBytes());
+    }
+
+    private long getTimeStamp() {
+        return System.currentTimeMillis() / 1000;
+    }
+
+	
+//MD5工具类
+public class MD5Utils {
+
+    private MD5Utils() {
+    }
+
+    public static String getMessageDigest(byte[] buffer) {
+        char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+        try {
+            MessageDigest mdTemp = MessageDigest.getInstance("MD5");
+            mdTemp.update(buffer);
+            byte[] md = mdTemp.digest();
+            int j = md.length;
+            char str[] = new char[j * 2];
+            int k = 0;
+            for (byte byte0 : md) {
+                str[k++] = hexDigits[byte0 >>> 4 & 0xf];
+                str[k++] = hexDigits[byte0 & 0xf];
+            }
+            return new String(str);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+}
+
+    
