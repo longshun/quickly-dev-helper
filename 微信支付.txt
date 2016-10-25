@@ -4,7 +4,7 @@
 	<activity android:name=".wxapi.WXPayEntryActivity"
             android:exported="true"
             >
-
+//处理支付结果界面
 public class WXPayEntryActivity extends BaseActivity implements IWXAPIEventHandler {
 
     @Override
@@ -47,7 +47,7 @@ public class WXPayEntryActivity extends BaseActivity implements IWXAPIEventHandl
 		
 	
 	
-	
+	//发起支付请求
 	private IWXAPI iwxapi;
 	private PayReq payReq;
 
@@ -124,5 +124,140 @@ public class MD5Utils {
         }
     }
 }
+
+//服务端微信统一下单操作在app端完成（服务器不给prePayId）
+public void wxUnifiedOrder(float totalMoney) {
+        setActionId(ACTION_WX_UNIFIED_ORDER);
+        //appid mch_id nonce_str sign body out_trade_no total_fee spbill_create_ip notify_url trade_type
+        HashMap<String, String> params = new HashMap<>();
+        params.put("appid", PayConstants.WX_APP_ID);//微信开放平台审核通过的应用APPID
+        String body = "问兔-购买商品";
+        params.put("body", body);//天天爱消除-游戏充值
+        params.put("mch_id", PayConstants.WX_MCH_ID);//微信支付分配的商户号
+        String nonceStr = PayUtils.getNonceStr();
+        params.put("nonce_str", nonceStr);//随机字符串，不长于32位。推荐随机数生成算法
+        params.put("notify_url", NetWorkCons.WX_PAY_NOTIFICATION_URL);//接收微信支付异步通知回调地址，通知url必须为直接可访问的url，不能携带参数。
+        String wxOrderId = PayUtils.getWxOrderId();
+        params.put("out_trade_no", wxOrderId);//商户系统内部的订单号,32个字符内、可包含字母, 其他说明见商户订单号
+        String ip = getLocalHostIP();
+        params.put("spbill_create_ip", ip);//用户端实际ip
+        String payType = "APP";
+        params.put("trade_type", payType);//支付类型
+        String total = String.valueOf((Math.round(totalMoney*100)));
+        params.put("total_fee", total);//订单总金额，单位为分，详见支付金额
+
+        UnifiedOrderParams orderParams = new UnifiedOrderParams();
+        orderParams.appid = PayConstants.WX_APP_ID;
+        orderParams.body = body;
+        orderParams.mch_id = PayConstants.WX_MCH_ID;
+        orderParams.nonce_str = nonceStr;
+        orderParams.notify_url = NetWorkCons.WX_PAY_NOTIFICATION_URL;
+        orderParams.out_trade_no = wxOrderId;
+        orderParams.spbill_create_ip = ip;
+        orderParams.trade_type = payType;
+        orderParams.total_fee = total;
+        String wxSign = getWxSign(orderParams);
+        Log.d("wx", "firstSign=" + wxSign);
+        params.put("sign", wxSign);//签名，参数值要按照ascall码（字典顺序）排序才行！
+
+        String xml = toXml(params);
+        Log.d("wx", "xml=" + xml);
+        OkHttpUtil.doPost(NetWorkCons.WX_UNIFIED_ORDER_URL, xml, this);
+    }
+
+    private String getWxSign(UnifiedOrderParams params) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("appid").append("=").append(params.appid).append("&");
+        sb.append("body").append("=").append(params.body).append("&");
+        sb.append("mch_id").append("=").append(params.mch_id).append("&");
+        sb.append("nonce_str").append("=").append(params.nonce_str).append("&");
+        sb.append("notify_url").append("=").append(params.notify_url).append("&");
+        sb.append("out_trade_no").append("=").append(params.out_trade_no).append("&");
+        sb.append("spbill_create_ip").append("=").append(params.spbill_create_ip).append("&");
+        sb.append("total_fee").append("=").append(params.total_fee).append("&");
+        sb.append("trade_type").append("=").append(params.trade_type).append("&");
+        sb.append("key=").append(PayConstants.WX_API_KEY);
+        Log.d("wx", "signString=" + sb.toString());
+        return MD5Utils.getMessageDigest(sb.toString().getBytes()).toUpperCase();
+    }
+
+    private String getLocalHostIP() {
+        try {
+            Enumeration<NetworkInterface> en = NetworkInterface
+                    .getNetworkInterfaces();
+            // 遍历所用的网络接口
+            while (en.hasMoreElements()) {
+                NetworkInterface nif = en.nextElement();// 得到每一个网络接口绑定的所有ip
+                Enumeration<InetAddress> inet = nif.getInetAddresses();
+                // 遍历每一个接口绑定的所有ip
+                while (inet.hasMoreElements()) {
+                    InetAddress ip = inet.nextElement();
+                    if (!ip.isLoopbackAddress() && (ip instanceof Inet4Address)) {
+                        Log.d("IP=", ip.getHostAddress());
+                        return ip.getHostAddress();
+                    }
+                }
+
+            }
+        } catch (SocketException e) {
+            Log.e("IP", "获取本地ip地址失败");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String toXml(HashMap<String, String> params) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<xml>");
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            sb.append("<").append(entry.getKey()).append(">");
+            sb.append(entry.getValue());
+            sb.append("</").append(entry.getKey()).append(">");
+        }
+        sb.append("</xml>");
+        return sb.toString();
+    }
+
+	//解析微信返回的订单号
+	getDataFromXml(new ByteArrayInputStream(jsonString.getBytes()));
+	
+	public void getDataFromXml(InputStream is) {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(is);
+
+            NodeList wordList = doc.getElementsByTagName("xml");
+            Log.d("wx", "共有" + wordList.getLength() + "个xml节点");
+            for (int i = 0; i < wordList.getLength(); i++) {
+                Node aWord = wordList.item(i);
+                Element elem = (Element) aWord;
+
+                for (Node node = elem.getFirstChild(); node != null; node = node.getNextSibling()) {
+                    if (node.getNodeType() == Node.ELEMENT_NODE) {
+                        if (node.getFirstChild() == null) {
+                            continue;
+                        }
+                        String name = node.getNodeName();
+                        if (name.equals("prepay_id")) {
+                            prePayId = node.getFirstChild().getNodeValue();
+                            Log.d("wx", "prepay_id=" + prePayId);
+                        } else if (name.equals("return_code")) {
+                            returnCode = node.getFirstChild().getNodeValue();
+                            Log.d("wx", "prepay_id=" + returnCode);
+                        } else if (name.equals("result_code")) {
+                            resultCode = node.getFirstChild().getNodeValue();
+                            Log.d("wx", "prepay_id=" + resultCode);
+                        }
+                    }
+                }
+                if (!TextUtils.isEmpty(prePayId)) {
+                    payReq.prepayId = prePayId;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     
