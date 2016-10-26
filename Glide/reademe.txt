@@ -1,0 +1,7 @@
+使用方法：
+1.带白色边框
+
+ Glide.with(mContext).load(xx).transform(new GlideCircleTransform(mContext,2,mContext.getResources().getColor(R.color.white))).into(xx);
+2.不带白色边框
+
+ Glide.with(mContext).load(xx).transform(new GlideCircleTransform(mContext).into(xx);
