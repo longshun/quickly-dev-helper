@@ -29,7 +29,7 @@ public class QuickIndexBar extends View {
 		"G", "H", "I", "J", "K", "L",
 		"M", "N", "O", "P", "Q", "R",
 		"S", "T", "U", "V", "W", "X",
-		"Y", "Z"};
+		"Y", "Z"，"#"};
 
 	private static final String TAG = "TAG";
 	
@@ -70,8 +70,9 @@ public class QuickIndexBar extends View {
 		super(context, attrs, defStyle);
 		
 		mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		mPaint.setColor(Color.WHITE);
+		mPaint.setColor(Color.BLACK);//绘制字体颜色
 		mPaint.setTypeface(Typeface.DEFAULT_BOLD);
+		mPaint.setTextSize(30);//绘制的字体
 	}
 	
 	@Override
@@ -88,7 +89,7 @@ public class QuickIndexBar extends View {
 			int y = (int) (cellHeight / 2.0f + textHeight / 2.0f + i * cellHeight);
 			
 			// 根据按下的字母, 设置画笔颜色
-			mPaint.setColor(touchIndex == i ? Color.GRAY : Color.WHITE);
+			mPaint.setColor(touchIndex == i ? Color.GRAY : Color.BLACK);;//p1 触摸显示颜色 p2正常显示颜色
 			
 			// 绘制文本A-Z
 			canvas.drawText(text, x, y, mPaint);
