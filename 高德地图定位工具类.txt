@@ -1,0 +1,94 @@
+package com.onetoo.www.onetoo.utils;
+
+import android.content.Context;
+
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
+
+/**
+ * 定位工具类
+ * Created by longShun on 2016/10/11.
+ */
+public final class LocationUtils implements AMapLocationListener {
+
+    //定位完成监听
+    private LocationCompletedListener locationCompletedListener;
+    //定位客户端
+    private AMapLocationClient locationClient;
+    private Context context;
+
+    public LocationUtils(Context context) {
+        this.context = context;
+        this.locationClient = new AMapLocationClient(context);
+    }
+
+    public void setOnceLocationOption() {
+        if (context != null) {
+            AMapLocationClientOption option = new AMapLocationClientOption();
+            //高精度
+            option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+            //设置一次定位
+            option.setOnceLocation(true);
+            //三次定位中取最精确的一次
+            option.setOnceLocationLatest(true);
+            locationClient.setLocationOption(option);
+        }
+    }
+    /*一直定位，间隔millSeconds毫秒*/
+    public void alwaysLocation(AMapLocationListener locationListener, long millSeconds) {
+        if (locationListener != null) {
+            AMapLocationClientOption option = new AMapLocationClientOption();
+            option.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+            option.setInterval(millSeconds);
+            locationClient.setLocationListener(locationListener);
+            locationClient.setLocationOption(option);
+            locationClient.startLocation();
+        }
+    }
+
+    public void startLocationByOptions(AMapLocationClientOption option, AMapLocationListener locationListener) {
+        if (option != null && locationListener != null) {
+            locationClient.setLocationOption(option);
+            locationClient.setLocationListener(locationListener);
+            locationClient.startLocation();
+        } else {
+            throw new RuntimeException("AMapLocationClientOption or AMapLocationListener cant be null!");
+        }
+    }
+
+    public void startOnceLocation(LocationCompletedListener locationCompletedListener) {
+        setOnceLocationOption();
+        startLocation(locationCompletedListener);
+    }
+
+    /*开始定位*/
+    public void startLocation(LocationCompletedListener locationCompletedListener) {
+        if (locationClient != null && locationCompletedListener != null) {
+            this.locationCompletedListener = locationCompletedListener;
+            locationClient.setLocationListener(this);
+            locationClient.startLocation();
+        }
+    }
+
+    @Override
+    public void onLocationChanged(AMapLocation aMapLocation) {
+        if (aMapLocation != null) {
+            if (aMapLocation.getErrorCode() == 0) {
+                this.locationCompletedListener.locationSuccess(aMapLocation);
+            } else {
+                this.locationCompletedListener.locationFail(aMapLocation);
+            }
+            this.locationClient.unRegisterLocationListener(this);
+            this.locationClient.onDestroy();
+            this.locationClient = null;
+        }
+    }
+
+    public interface LocationCompletedListener {
+        void locationSuccess(AMapLocation aMapLocation);
+
+        void locationFail(AMapLocation aMapLocation);
+    }
+}
