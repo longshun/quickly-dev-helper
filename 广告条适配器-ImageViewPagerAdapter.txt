@@ -1,4 +1,4 @@
-package com.longshun.animationdemo.zhufengfm.zhufengfm.adapters;
+ï»¿package com.longshun.animationdemo.zhufengfm.zhufengfm.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -20,7 +20,7 @@ import java.util.List;
 public class ViewPagerImagesAdapter extends PagerAdapter {
 
     private Context context;
-    private List<FocusImage> focusImages;//°üº¬Í¼Æ¬µØÖ·µÄÊµÌå
+    private List<FocusImage> focusImages;//åŒ…å«å›¾ç‰‡åœ°å€çš„å®ä½“
 
     public ViewPagerImagesAdapter(Context context, List<FocusImage> focusImages) {
         this.context = context;
@@ -29,16 +29,16 @@ public class ViewPagerImagesAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        //1.ÏÔÊ¾Í¼Æ¬
+        //1.æ˜¾ç¤ºå›¾ç‰‡
         ImageView imageView = new ImageView(context);
-        imageView.setId(position);//ÉèÖÃid£¬ÒÔ±ã»ñÈ¡ÏàÓ¦µÄÍ¼Æ¬¶ÔÏó
+        imageView.setId(position);//è®¾ç½®idï¼Œä»¥ä¾¿è·å–ç›¸åº”çš„å›¾ç‰‡å¯¹è±¡
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        //µÃµ½ÒªÏÔÊ¾µÄ½¹µãÍ¼Æ¬µÄµØÖ·
+        //å¾—åˆ°è¦æ˜¾ç¤ºçš„ç„¦ç‚¹å›¾ç‰‡çš„åœ°å€
         String picUrl = focusImages.get(position).getPic();
-        //¿ªÆôÒì²½ÈÎÎñ¼ÓÔØÍ¼Æ¬µ½ImageViewÉÏ
+        //å¼€å¯å¼‚æ­¥ä»»åŠ¡åŠ è½½å›¾ç‰‡åˆ°ImageViewä¸Š
         ImageLoadTask task = new ImageLoadTask(imageView);
         task.execute(picUrl);
-        //2.¼àÌıÊÂ¼ş
+        //2.ç›‘å¬äº‹ä»¶
         imageView.setOnClickListener(new View.OnClickListener() {
 
             @Override
