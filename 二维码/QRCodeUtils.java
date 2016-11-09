@@ -25,6 +25,7 @@ import java.util.Hashtable;
 
 /**
  * Created by longShun on 2016/10/9.
+ * 二维码相关
  */
 public final class QRCodeUtils {
 
@@ -49,12 +50,11 @@ public final class QRCodeUtils {
     /**
      * @param ivQrCode 装有二维码的控件
      */
-    public static void saveQRCode(ImageView ivQrCode) {
+    public static void saveQRCode(ImageView ivQrCode,String dirPath) {
         Drawable drawable = ivQrCode.getDrawable();
         BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
         Bitmap bitmap1 = bitmapDrawable.getBitmap();
-        String path = Environment.getExternalStorageDirectory().getPath();
-        File file = new File(path,"qrCode.png");
+        File file = new File(dirPath,"qrCode.png");
         FileOutputStream stream = null;
         try {
             stream = new FileOutputStream(file);
