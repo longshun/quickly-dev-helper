@@ -1,0 +1,10 @@
+//模拟gif动画的图片集合
+ArrayList<BitmapDescriptor> arrayList = new ArrayList<>();
+arrayList.add(BitmapDescriptorFactory.fromResource(R.drawable.xxx));
+arrayList.add(BitmapDescriptorFactory.fromResource(R.drawable.xxx));
+...
+
+MarkerOptions options = new MarkerOptions();
+options.title("炫彩动画");//不设置title好像没有效果
+options.position(new LatLng(latitude, longitude)).icons(arrayList).period(3);;//3:图片刷新的频率,越小刷新越快
+aMap.addMarker(options);
