@@ -25,6 +25,19 @@
         adapter = new AllOrderViewPagerAdapter(getSupportFragmentManager(), fragments, tabTitles);
         vpCategory.setAdapter(adapter);
         titleBar.setupWithViewPager(vpCategory);
+		
+		//下面可以设置每个tab布局
+        for (int i = 0; i < titleBar.getTabCount(); i++) {
+            TabLayout.Tab tab = titleBar.getTabAt(i);
+            if (tab != null) {
+                View tabView = LayoutInflater.from(getActivity()).inflate(R.layout.tab_order, null);
+                ImageView ivOrder = (ImageView) tabView.findViewById(R.id.iv_tab_order);
+                TextView tvOrder = (TextView) tabView.findViewById(R.id.tv_tab_order);
+                ivOrder.setImageResource(tabIcons[i]);
+                tvOrder.setText(tabTitles.get(i));
+                tab.setCustomView(tabView);
+            }
+        }
     }
 	
 	private void updateCategoryTitle(String data) {
