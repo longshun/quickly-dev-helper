@@ -1,0 +1,118 @@
+带head的listview，当head消失渐变显示显示导航标题栏，反之，隐藏标题栏；
+1.布局：
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:ptr="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragment.home.HomeStoreFragment"
+    >
+    <com.handmark.pulltorefresh.library.PullToRefreshListView
+        android:id="@+id/lv_home_store_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        ptr:ptrDrawable="@drawable/default_ptr_flip"
+        ptr:ptrAnimationStyle="flip"
+        />
+    <!--top 搜索栏-->
+    <LinearLayout
+        android:id="@+id/ll_top_search"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/zuti"
+        android:visibility="invisible"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/shape_edit_cornor"
+            android:gravity="center"
+            >
+            <ImageView
+                android:id="@+id/iv_search_icon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/icon_navbar_search"
+                android:layout_marginRight="5dp"
+                />
+            <EditText
+                android:id="@+id/et_store_search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="输入商家或商品名"
+                android:textColorHint="@color/shenhui"
+                android:background="@null"
+                />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
+
+2.关键代码：
+private boolean isFlingScroll;
+private View headView;
+private PullToRefreshListView lvHomeStore;
+
+initView(){
+    lvHomeStore = (PullToRefreshListView) view.findViewById(R.id.lv_home_store_list);
+    lvHomeStore.setMode(PullToRefreshBase.Mode.BOTH);
+    ListView listView = lvHomeStore.getRefreshableView();
+    headView = initHeadView();
+    AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.WRAP_CONTENT);//这句要加上去
+    headView.setLayoutParams(layoutParams);
+    listView.addHeaderView(headView);
+    lvHomeStore.setAdapter(adapter);
+    lvHomeStore.setOnScrollListener(this);
+}
+
+@Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (scrollState == SCROLL_STATE_FLING) {//手指离开手机界面，Listview还在滑动
+            isFlingScroll = true;
+        } else if (scrollState == SCROLL_STATE_TOUCH_SCROLL) {//手指在界面上滚动的情况
+            isFlingScroll = false;
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        showSearchBarShow();
+    }
+
+    private void showSearchBarShow() {
+        int headBottomToParentTop = headView.getHeight() + headView.getTop();
+        Log.d("homeStore", "headView.getHeight(): " + headView.getHeight());
+        Log.d("homeStore", "headView.getTop(): " + headView.getTop());
+        Log.d("homeStore", "headBottomToParentTop: " + headBottomToParentTop);
+        if (!isFlingScroll) {//手指在界面滑动的情况
+            int height = layoutSearch.getHeight();
+            Log.d("homeStore", "height: " + height);
+            if (headBottomToParentTop > height) {
+                layoutSearch.setVisibility(View.INVISIBLE);
+            } else if (headBottomToParentTop <= height) {//缓慢滑动，这部分代码工作正常，快速滑动，里面的数据就跟不上节奏了。
+                float alpha = (height - headBottomToParentTop) * 1f / height;
+                Log.d("homeStore", "alpha: " + alpha);
+                layoutSearch.setAlpha(alpha);
+                layoutSearch.setVisibility(View.VISIBLE);
+            }
+            if (!headView.isShown()){//解决快速滑动，上部分代码不能正常工作的问题。
+                layoutSearch.setAlpha(1);
+                layoutSearch.setVisibility(View.VISIBLE);
+            }
+        } else {//手指离开，listview还在滑动，一般情况是列表快速滑动，这种情况直接设置导航栏的可见性
+            if (!headView.isShown()) {
+                if (!layoutSearch.isShown()){
+                    layoutSearch.setVisibility(View.VISIBLE);
+                    layoutSearch.setAlpha(1);
+                }
+            } else {
+                if (layoutSearch.isShown()){
+                    layoutSearch.setVisibility(View.INVISIBLE);
+                }
+            }
+        }
+    }
