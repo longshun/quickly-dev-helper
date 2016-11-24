@@ -71,6 +71,17 @@ public class StringUtils {
 		}
 		return false;
 	}
+	
+	/**
+	 * 是否为金额
+	 */
+	public boolean isMoney(String money){
+        if(!TextUtils.isEmpty(money)){
+            String regex = "([0-9]|\\.)*";
+            return isMatch(regex, money);
+        }
+        return false;
+    }
 
 	/**
 	 *  字符串正则校验
