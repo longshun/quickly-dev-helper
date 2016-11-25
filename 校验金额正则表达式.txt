@@ -1,0 +1,58 @@
+Pattern pattern = Pattern.compile("^((([1-9]{1}//d{0,9}))|([0]{1}))((//.(//d){2}))?$");
+  Matcher matcher = pattern.matcher("3333333333.99");
+  System.out.println(matcher.matches());
+ 
+ 
+ 
+输入的金额：
+最大金额 9999999999.99
+最小金额 0
+ 
+格式 XXXX （整数位不超过10位，无小数位）或者XXXX.xx（整数位不超过10位，有小数位时必须为2位）
+
+
+Pattern pattern = Pattern.compile("(([1-9]{1}\\d*)|([0]{1}))(\\.(\\d){1,2})?$");
+
+@Override
+    public void afterTextChanged(Editable s) {
+        if (s.toString().contains(".")){
+            if (!StringUtils.isMoney(s.toString())) {
+                int indexOf = s.toString().indexOf(".");
+                if (indexOf == 0) {
+                    etInputMoney.setText("");
+                } else {
+                    if (s.toString().length() - 1 > indexOf + 2) {
+                        inputMoney = inputMoney.substring(0, indexOf + 3);
+                        etInputMoney.setText(inputMoney);
+                        etInputMoney.setSelection(inputMoney.length());
+                    } else {
+                        inputMoney = s.toString();
+                    }
+                }
+            } else {
+                inputMoney = s.toString();
+            }
+        }else {
+            inputMoney = s.toString();
+        }
+    }
+
+	
+	public static boolean isMoney(String money){
+        if(!TextUtils.isEmpty(money)){
+            //String regex = "([0-9]|\\.)*";
+            String regex = "(([1-9]{1}\\d*)|([0]{1}))(\\.(\\d){1,2})?$";
+            return isMatch(regex, money);
+        }
+        return false;
+    }
+
+    /**
+     *  字符串正则校验
+     */
+    public static boolean isMatch(String regex, String string) {
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(string);
+        return matcher.matches();
+    }
