@@ -13,14 +13,14 @@ Pattern pattern = Pattern.compile("^((([1-9]{1}//d{0,9}))|([0]{1}))((//.(//d){2}
 
 Pattern pattern = Pattern.compile("(([1-9]{1}\\d*)|([0]{1}))(\\.(\\d){1,2})?$");
 
-@Override
+	@Override
     public void afterTextChanged(Editable s) {
-        if (s.toString().contains(".")){
-            if (!StringUtils.isMoney(s.toString())) {
+        if (!StringUtils.isMoney(s.toString())) {//不是金钱
+            if (s.toString().contains(".")) {//包含"."
                 int indexOf = s.toString().indexOf(".");
-                if (indexOf == 0) {
+                if (indexOf == 0) {//过滤"."第一位的情况
                     etInputMoney.setText("");
-                } else {
+                } else {//"."后面出现2位数以上的情况
                     if (s.toString().length() - 1 > indexOf + 2) {
                         inputMoney = inputMoney.substring(0, indexOf + 3);
                         etInputMoney.setText(inputMoney);
@@ -29,10 +29,16 @@ Pattern pattern = Pattern.compile("(([1-9]{1}\\d*)|([0]{1}))(\\.(\\d){1,2})?$");
                         inputMoney = s.toString();
                     }
                 }
-            } else {
-                inputMoney = s.toString();
+            } else {//不包含".",判断第一位是0的情况
+                if (s.toString().indexOf("0") == 0 && s.toString().length() > 1) {
+                    if (TextUtils.equals(s.toString().substring(1, 2), "0")) {
+                        inputMoney = "0";
+                        etInputMoney.setText(inputMoney);
+                        etInputMoney.setSelection(inputMoney.length());
+                    }
+                }
             }
-        }else {
+        } else {//是金钱不作处理
             inputMoney = s.toString();
         }
     }
