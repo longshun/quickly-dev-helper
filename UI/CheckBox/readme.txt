@@ -1,2 +1,2 @@
-²Î¿¼µØÖ· 
+ï»¿å‚è€ƒåœ°å€   
 https://github.com/andyxialm/SmoothCheckBox
