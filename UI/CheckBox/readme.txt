@@ -1,2 +1,2 @@
-﻿参考地址   
+参考地址     
 https://github.com/andyxialm/SmoothCheckBox
