@@ -58,3 +58,112 @@
 	其实一直觉得很奇怪，不明白为什么一个背景会影响点击事件，只知道这样用可行。
 	原因：如果有背景，则会在contentView外面包一层PopupViewContainer之后作为mPopupView，如果没有背景，则直接用contentView作为mPopupView。
 而这个PopupViewContainer是一个内部私有类，它继承了FrameLayout，在其中重写了Key和Touch事件的分发处理
+
+
+
+package com.onetoo.www.onetoo.ui;
+
+import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
+
+import com.onetoo.www.onetoo.R;
+import com.onetoo.www.onetoo.abapter.home.HomeCategoryRecycleAdapter;
+import com.onetoo.www.onetoo.config.SpaceItemDecoration;
+import com.onetoo.www.onetoo.utils.DensityUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by longShun on 2017/2/6.
+ * desc 首页分类弹出框
+ */
+public class PopWindowForHomeCategory extends PopupWindow implements HomeCategoryRecycleAdapter.OnItemClickListener{
+
+    private Context mContext;
+
+    private View mPopWindowView;
+
+
+    public PopWindowForHomeCategory(Context context) {
+        super(context);
+        this.mContext = context;
+
+        initWindowView();
+        initPopWindow();
+    }
+
+    private void initPopWindow() {
+        //设置的View
+        setContentView(mPopWindowView);
+        //设置弹出窗体的宽
+        setWidth(RelativeLayout.LayoutParams.MATCH_PARENT);
+        //设置弹出窗体的高
+        setHeight(RelativeLayout.LayoutParams.WRAP_CONTENT);
+        //设置弹出窗体可点击
+        setFocusable(true);
+        //设置弹出窗体动画效果
+        setAnimationStyle(R.style.PopWindowFadeInOut);//弹出的效果
+        //实例化一个ColorDrawable颜色为半透明
+        ColorDrawable dw = new ColorDrawable(0xb0000000);
+        //设置弹出窗体的背景
+        setBackgroundDrawable(dw);
+    }
+
+	//设置窗体内容
+    private void initWindowView() {
+        mPopWindowView = LayoutInflater.from(mContext).inflate(R.layout.home_category, null);
+
+        RecyclerView mRvCategory = (RecyclerView) mPopWindowView.findViewById(R.id.rv_home_category);
+        mRvCategory.addItemDecoration(new SpaceItemDecoration(DensityUtils.dp2px(mContext,10)));
+        mRvCategory.setLayoutManager(new GridLayoutManager(mContext,3));
+
+        List<String> mListCategory =new ArrayList<>();
+        mListCategory.add("餐饮美食");
+        mListCategory.add("购物");
+        mListCategory.add("生活服务");
+        mListCategory.add("丽人");
+        mListCategory.add("休闲娱乐");
+        mListCategory.add("母婴亲子");
+
+        List<Integer> mListIcon = new ArrayList<>();
+        mListIcon.add(R.drawable.home_food);
+        mListIcon.add(R.drawable.home_shop);
+        mListIcon.add(R.drawable.home_service);
+        mListIcon.add(R.drawable.home_beautiful);
+        mListIcon.add(R.drawable.home_funny);
+        mListIcon.add(R.drawable.home_baby);
+
+        HomeCategoryRecycleAdapter adapter = new HomeCategoryRecycleAdapter(mContext, mListCategory, mListIcon);
+        mRvCategory.setAdapter(adapter);
+
+        adapter.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        if (onItemClickListener != null) {
+            onItemClickListener.onItemClick(position);
+        }
+    }
+
+    private HomeCategoryRecycleAdapter.OnItemClickListener onItemClickListener;
+
+    public void setOnItemClickListener(HomeCategoryRecycleAdapter.OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
+}
+
+
+
+
+
+
+
