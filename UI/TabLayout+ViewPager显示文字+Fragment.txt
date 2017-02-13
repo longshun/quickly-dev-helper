@@ -1,0 +1,175 @@
+	//xml中
+	<android.support.design.widget.TabLayout
+        android:id="@+id/tl_category_bar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:tabIndicatorColor="@color/zuti"//设置指示条颜色
+        />
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vp_category_pagers"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_below="@id/tl_category_bar"
+        />
+	
+	
+	//tab_order.xml   每个tab的布局  能切出适合尺寸的图片就不用这样麻烦，直接给tab设置的textview设置drawableleft之类的属性
+	<?xml version="1.0" encoding="utf-8"?>
+	<LinearLayout
+		android:id="@+id/tabView"
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:gravity="center"
+		android:orientation="vertical"
+		>
+
+		<ImageView
+			android:id="@+id/iv_tab_order"
+			android:layout_width="30dp"
+			android:layout_height="30dp"
+			android:src="@drawable/icon_order_pending_payment"
+			/>
+
+		<TextView
+			android:id="@+id/tv_tab_order"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="订单"
+			android:textColor="@color/text"
+			android:textSize="13sp"
+			/>
+	</LinearLayout>
+	
+	//Activity代码
+	private List<Fragment> fragments = new ArrayList<>();
+    private List<String> tabTitles = new ArrayList<>();
+    private AllOrderViewPagerAdapter adapter;
+	
+	protected void initUi() {
+        
+        List<Fragment> listFragment = new ArrayList<>();
+        listFragment.add(new StoreIntruduceFragment());
+        listFragment.add(new DiscountSaleFragment());
+        listFragment.add(new AllGoodFragment());
+        listFragment.add(new StoreCommentFragment());
+
+        initTitleRes();
+
+        viewPager.setAdapter(new AllOrderViewPagerAdapter(getSupportFragmentManager(),listFragment,listTitle));
+        viewPager.addOnPageChangeListener(this);
+
+        titleBar = (TabLayout) findViewById(R.id.tl_store_details_tabs);
+        titleBar.setupWithViewPager(viewPager);
+
+        //设置每个tab布局
+        for (int i = 0; i < titleBar.getTabCount(); i++) {
+            TabLayout.Tab tab = titleBar.getTabAt(i);
+            if (tab != null) {
+                View tabView = LayoutInflater.from(this).inflate(R.layout.tab_order, null);
+                tabView.setTag(i);
+                tabView.setOnClickListener(this);
+                ImageView ivOrder = (ImageView) tabView.findViewById(R.id.iv_tab_order);
+                TextView tvOrder = (TextView) tabView.findViewById(R.id.tv_tab_order);
+                tvOrder.setText(listTitle.get(i));
+                if (i == 0){
+                    ivOrder.setImageResource(tabSelectIcons[i]);
+                    tvOrder.setTextColor(getResources().getColor(R.color.zuti));
+                }else{
+                    ivOrder.setImageResource(tabIcons[i]);
+                }
+                tab.setCustomView(tabView);
+            }
+        }
+    }
+	
+	private void initTitleRes() {
+        listTitle = new ArrayList<>();
+        listTitle.add("店铺介绍");
+        listTitle.add("优惠抢购");
+        listTitle.add("全部商品");
+        listTitle.add("店铺评价");
+
+        tabIcons = new int[]{R.drawable.order_store_info,R.drawable.order_store_discount,
+                R.drawable.order_store_all_good,R.drawable.order_store_comment};
+
+        tabSelectIcons = new int[]{R.drawable.order_store_info_press,R.drawable.order_store_discount_press,
+                R.drawable.order_store_all_good_press,R.drawable.order_store_comment_press};
+    }
+	
+	 @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.tabView:
+                changeTabStatus(true,(Integer) v.getTag());
+                break;
+        }
+    }
+	
+	private void changeTabStatus(boolean isNeedSetViewPager,int position) {
+        if (isNeedSetViewPager){
+            viewPager.setCurrentItem(position);
+        }
+        for (int i = 0; i < titleBar.getTabCount(); i++) {
+            TabLayout.Tab tab = titleBar.getTabAt(i);
+            if (tab != null) {
+                View tabView = tab.getCustomView();
+                ImageView ivOrder = (ImageView) tabView.findViewById(R.id.iv_tab_order);
+                TextView tvOrder = (TextView) tabView.findViewById(R.id.tv_tab_order);
+                tvOrder.setText(listTitle.get(i));
+                if (i==position){
+                    ivOrder.setImageResource(tabSelectIcons[i]);
+                    tvOrder.setTextColor(getResources().getColor(R.color.zuti));
+                }else {
+                    ivOrder.setImageResource(tabIcons[i]);
+                    tvOrder.setTextColor(Color.parseColor("#838383"));
+                }
+            }
+        }
+    }
+	
+	@Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        changeTabStatus(false,position);
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
+    }
+	
+	
+	//Adapter
+	public class AllOrderViewPagerAdapter extends FragmentPagerAdapter {
+
+    private List<Fragment> fragments;
+    private List<String> titles;
+
+    public AllOrderViewPagerAdapter(FragmentManager fm, List<Fragment> fragments, List<String> titles) {
+        super(fm);
+        this.fragments = fragments;
+        this.titles = titles;
+    }
+
+    @Override
+    public Fragment getItem(int position) {
+        return fragments.get(position);
+    }
+
+    @Override
+    public int getCount() {
+        return fragments == null ? 0 : fragments.size();
+    }
+
+    //此方法用来显示tab上的名字
+    @Override
+    public CharSequence getPageTitle(int position) {
+
+        return titles.get(position % titles.size());
+    }
+}
