@@ -1,0 +1,122 @@
+参考资料：https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.ckDeXr&treeId=204&articleId=105296&docType=1
+
+资料下载：https://doc.open.alipay.com/doc2/detail.htm?treeId=54&articleId=104509&docType=1
+
+1.导入SDK jar包（Android Studio）
+
+2.在商户应用工程的AndroidManifest.xml文件里面添加声明：
+
+//权限有了就不用重复加了
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+
+
+
+<activity
+            android:name="com.alipay.sdk.app.H5PayActivity"
+            android:configChanges="orientation|keyboardHidden|navigation"
+            android:exported="false"
+            android:screenOrientation="behind" >
+</activity>
+<activity
+            android:name="com.alipay.sdk.auth.AuthActivity"
+            android:configChanges="orientation|keyboardHidden|navigation"
+            android:exported="false"
+            android:screenOrientation="behind" >
+ </activity>
+ 
+3.调起支付宝，注意 支付行为需要在独立的非ui线程中执行
+
+3.1.先去app服务器获取orderInfo
+private void getOrderInfo(){
+    //todo...
+}
+
+3.2.拿到orderInfo开始吊起支付
+private void payByAli(final String orderInfo) {
+        Runnable payRunnable = new Runnable() {
+            @Override
+            public void run() {
+                PayTask alipay = new PayTask(PayOrderByQrActivity.this);
+                Map<String, String> result = alipay.payV2(orderInfo, true);
+
+                Message msg = new Message();
+                msg.what = PAY_TYPE_ALI;
+                msg.obj = result;
+                mHandler.sendMessage(msg);
+            }
+        };
+        // 必须异步调用
+        Thread payThread = new Thread(payRunnable);
+        payThread.start();
+    }
+
+3.3.处理支付结果
+
+支付宝返回的一部分数据String result = payResult.get(“result”);
+					{
+                        "alipay_trade_app_pay_response": {
+                            "code": "10000",
+                            "msg": "Success",
+                            "app_id": "201605xxxxxxx",
+                            "auth_app_id": "201605xxxxxx",
+                            "charset": "UTF-8",
+                            "timestamp": "2017-01-04 11:29:15",
+                            "total_amount": "0.01",
+                            "trade_no": "2017010421001004880xxxxxx",
+                            "seller_id": "20882218763xxx",
+                            "out_trade_no": "142017010411xxxxxxx"
+                        },
+                        "sign": "cYLe5dknAMCOR3vw67kiChzG7igJg2+wWXto0KqHW3K3QfCalbxIzEpKVQNVj4t8K/lvQW0SlwS+4c8XfxZeQqRRoLnkhNaXyaRi6FM6Upfqb09wDxtczrs6WZYt3bYFH3Q9MYnxxxxxxx",
+                        "sign_type": "RSA"
+                    }
+									
+同步返回的结果
+private Handler mHandler = new Handler() {
+        public void handleMessage(Message msg) {
+
+            switch (msg.what) {
+                case PAY_TYPE_ALI:
+                    Log.d(TAG, "handleMessage: alipay=" + msg.obj);
+                    Map<String, String> payResult = (Map<String, String>) msg.obj;
+                    String resultStatus = payResult.get("resultStatus");
+                    Log.d(TAG, "handleMessage: alipay=" + resultStatus);
+
+                    String result = payResult.get("result");
+
+                    if (!TextUtils.isEmpty(result)) {
+                        JSONObject jsonObject = JSON.parseObject(result);
+                        JSONObject response = jsonObject.getJSONObject("alipay_trade_app_pay_response");
+                        String orderNo = response.getString("out_trade_no");
+                        if (!TextUtils.isEmpty(orderNo)) {
+                           //todo... 访问自己的服务器异步获取支付结果
+                        }
+                    }
+                    //String memo = payResult.get("memo");
+                    // 判断resultStatus 为9000则代表支付成功
+                    /*if (TextUtils.equals(resultStatus, "9000")) {
+                        // 该笔订单是否真实支付成功，需要依赖服务端的异步通知。
+                        //tips("提示：", "支付成功");
+                    } else {
+                        // 该笔订单真实的支付结果，需要依赖服务端的异步通知。
+                        //tips("提示：", "需要服务器返回支付信息");
+                    }*/
+                    break;
+            }
+        }
+    };
+	
+4.从自己的服务器获取支付结果：
+异步通知 
+商户需要提供一个http协议的接口，包含在请求支付的入参中，其key对应notify_url。支付宝服务器在支付完成后，会以POST方式调用notify_url传输数据。
+//todo...请求自己服务器获取支付结果后，进行相应的处理
+
+
+
+
+
+
