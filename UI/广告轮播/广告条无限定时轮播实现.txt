@@ -1,0 +1,88 @@
+//适配器
+class MyAdapter extends PagerAdapter {
+        @Override
+        public int getCount() {
+            return Integer.MAX_VALUE;
+        }
+
+        @Override
+        public boolean isViewFromObject(View view, Object object) {
+            return view == object;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            View view = View.inflate(MainActivity.this, R.layout.xxx,
+                    null);
+            ImageView iv = (ImageView) view.findViewById(R.id.iv);
+            Data data = list.get(position%list.size());
+            int picId = data.getPicId();
+            iv.setImageResource(picId);
+            container.addView(view);
+            return view;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            container.removeView((View) object);
+        }
+    }
+	
+//ViewPager配合xxx布局使用;Activity中部分代码
+	private Handler handler = new Handler(){
+        public void handleMessage(android.os.Message msg) {
+            viewPager.setCurrentItem(viewPager.getCurrentItem()+1);
+            handler.sendEmptyMessageDelayed(0, DELAY_Millis);
+        };
+    };
+	
+	list.add(new Data(R.drawable.a, "巩俐不低俗，我就不能低俗"));
+        list.add(new Data(R.drawable.b, "朴树又回来了，再唱经典老歌引百万人同唱啊"));
+        list.add(new Data(R.drawable.c, "揭秘北京电影如何升级"));
+        list.add(new Data(R.drawable.d, "乐视网TV版大放送"));
+        list.add(new Data(R.drawable.e, "热血屌丝的反杀"));
+	viewPager.setOnPageChangeListener(new OnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                updatePointAndText();
+            }
+
+            @Override
+            public void onPageScrolled(int position, float positionOffset,
+                    int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+	initPoints();
+	viewPager.setAdapter(new MyAdapter());
+    viewPager.setCurrentItem(Integer.MAX_VALUE/2 - Integer.MAX_VALUE/2%list.size()); 
+	updatePointAndText();
+    handler.sendEmptyMessageDelayed(0, DELAY_Millis);
+	
+	private void initPoints() {
+        for (int i = 0; i < list.size(); i++) {
+            View view = new View(this);
+            LayoutParams params = new LayoutParams(DensityUtils.dip2px(this, 5), DensityUtils.dip2px(this, 5));
+            if (i != 0) {
+                params.leftMargin = DensityUtils.dip2px(this, 5);
+            }
+            view.setLayoutParams(params);
+            view.setBackgroundResource(R.drawable.selector_points);
+            points.addView(view);
+        }
+    }
+
+    private void updatePointAndText() {
+        int currentItem = viewPager.getCurrentItem()%list.size();
+        for (int i = 0; i < points.getChildCount(); i++) {
+            points.getChildAt(i).setEnabled(currentItem == i);
+        }
+        textView.setText(list.get(currentItem).getPicdesc());
+    }
+	
+	

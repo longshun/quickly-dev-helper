@@ -1,0 +1,316 @@
+/**
+ * Created by longShun on 2016/10/29.
+ * desc好友
+ */
+public class Friend implements Comparable<Friend>{
+    private String avatar;
+    private String pinYin;
+    private String nickname;
+    private String firstLetter;
+
+    public Friend() {
+    }
+
+    public Friend(String nickname) {
+        this.nickname = nickname;
+        String pinYin = PinYinUtils.getPinYin(nickname);
+        firstLetter = pinYin.substring(0, 1).toUpperCase();
+        if (!firstLetter.matches("[A-Z]")){
+            firstLetter = "#";
+        }
+    }
+
+    @Override
+    public int compareTo(@NonNull Friend another) {
+        if (firstLetter.equals("#") && !another.getFirstLetter().equals("#")) {
+            return 1;
+        } else if (!firstLetter.equals("#") && another.getFirstLetter().equals("#")){
+            return -1;
+        } else {
+            return pinYin.compareToIgnoreCase(another.getPinYin());
+        }
+    }
+
+}
+
+
+//Activity中代码
+Collections.sort(friendList);进行排序
+
+@Override
+    public void onLetterUpdate(String letter) {
+        if (TextUtils.equals("↑", letter)) {
+            lvFriends.setSelection(0);
+        } else {
+            for (int i = 0; i < friendList.size(); i++) {
+                if (TextUtils.equals(friendList.get(i).getFirstLetter(), letter)) {
+                    lvFriends.setSelection(i + 1); // 选择到首字母出现的位置
+                    return;
+                }
+            }
+        }
+    }
+
+
+//adapter
+
+package com.onetoo.www.onetoo.abapter.my;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.onetoo.www.onetoo.R;
+import com.onetoo.www.onetoo.bean.my.Friend;
+import com.onetoo.www.onetoo.utils.glideutils.GlideCircleTransform;
+
+import java.util.List;
+
+/**
+ * Created by longShun on 2016/10/29.
+ * desc好友列表适配器
+ */
+public class FriendListViewAdapter extends BaseAdapter {
+
+    private Context context;
+    private List<Friend> friendList;
+
+    public FriendListViewAdapter(Context context, List<Friend> friendList) {
+        this.context = context;
+        this.friendList = friendList;
+    }
+
+    @Override
+    public int getCount() {
+        return friendList == null ? 0 : friendList.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return friendList.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View view;
+        if (convertView != null) {
+            view = convertView;
+        } else {
+            view = LayoutInflater.from(context).inflate(R.layout.item_friend_list_no_pine, parent, false);
+        }
+        FriendViewHolder holder = (FriendViewHolder) view.getTag();
+        if (holder == null) {
+            holder = new FriendViewHolder();
+            holder.ivAvatar = (ImageView) view.findViewById(R.id.iv_friend_list_item_avatar);
+            holder.tvNickname = (TextView) view.findViewById(R.id.tv_friend_list_item_nickname);
+            holder.tvLetter = (TextView) view.findViewById(R.id.tv_letter);
+            view.setTag(holder);
+        }
+        holder.tvNickname.setText(friendList.get(position).getNickname());
+        Glide.with(context).load(friendList.get(position).getAvatar()).transform(new GlideCircleTransform(context))
+                .placeholder(R.drawable.icon_avatar_placeholder).into(holder.ivAvatar);
+        //显示letter
+        //如果当前位置等于该分类首字母的Char的位置 ，则认为是第一次出现
+        String firstLetter = friendList.get(position).getFirstLetter();
+        if (position == getPositionForSection(firstLetter)) {
+            holder.tvLetter.setVisibility(View.VISIBLE);
+            holder.tvLetter.setText(firstLetter);
+        }else {
+            holder.tvLetter.setVisibility(View.GONE);
+        }
+        return view;
+    }
+
+    class FriendViewHolder {
+        ImageView ivAvatar;
+        TextView tvNickname, tvLetter;
+    }
+
+    private int getPositionForSection(String catalog) {
+        for (int i = 0; i < getCount(); i++) {
+            String sortStr = friendList.get(i).getFirstLetter();
+            if (catalog.equalsIgnoreCase(sortStr)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}
+
+
+
+//字母索引条
+package com.onetoo.www.onetoo.ui;
+
+/**
+ * Created by longShun on 2016/10/29.
+ * desc
+ */
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.support.v4.view.MotionEventCompat;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+
+import com.onetoo.www.onetoo.utils.DensityUtils;
+
+/**
+ * 快速索引
+ * 用于根据字母快速定位联系人
+ *
+ * @author longShun
+ */
+public class QuickIndexBar extends View {
+
+    private static final String[] LETTERS = new String[]{"↑",
+            "A", "B", "C", "D", "E", "F",
+            "G", "H", "I", "J", "K", "L",
+            "M", "N", "O", "P", "Q", "R",
+            "S", "T", "U", "V", "W", "X",
+            "Y", "Z", "#"};
+
+    private static final String TAG = "TAG";
+
+    private Paint mPaint;
+
+    private int cellWidth;
+
+    private float cellHeight;
+
+    /**
+     * 暴露一个字母的监听
+     */
+    public interface OnLetterUpdateListener {
+        void onLetterUpdate(String letter);
+    }
+
+    private OnLetterUpdateListener listener;
+
+    public OnLetterUpdateListener getListener() {
+        return listener;
+    }
+
+    /**
+     * 设置字母更新监听
+     */
+    public void setListener(OnLetterUpdateListener listener) {
+        this.listener = listener;
+    }
+
+    public QuickIndexBar(Context context) {
+        this(context, null);
+    }
+
+    public QuickIndexBar(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public QuickIndexBar(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+
+        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPaint.setColor(Color.parseColor("#23b7c1"));//默认绘制的颜色
+        mPaint.setTypeface(Typeface.DEFAULT_BOLD);
+        mPaint.setTextSize(30);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+
+        for (int i = 0; i < LETTERS.length; i++) {
+            String text = LETTERS[i];
+            // 计算坐标
+            int x = (int) (cellWidth / 2.0f - mPaint.measureText(text) / 2.0f);
+            // 获取文本的高度
+            Rect bounds = new Rect();// 矩形
+            mPaint.getTextBounds(text, 0, text.length(), bounds);
+            int textHeight = bounds.height();
+            int y = (int) (cellHeight / 2.0f + textHeight / 2.0f + i * cellHeight);
+
+            // 根据按下的字母, 设置画笔颜色
+            mPaint.setColor(touchIndex == i ? Color.GRAY : Color.parseColor("#23b7c1"));//触摸到变黑，显示时灰色
+
+            // 绘制文本A-Z
+            canvas.drawText(text, x, y, mPaint);
+        }
+    }
+
+    int touchIndex = -1;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int index = -1;
+        switch (MotionEventCompat.getActionMasked(event)) {
+            case MotionEvent.ACTION_DOWN:
+                // 获取当前触摸到的字母索引
+                index = (int) (event.getY() / cellHeight);
+                if (index >= 0 && index < LETTERS.length) {
+                    // 判断是否跟上一次触摸到的一样
+                    if (index != touchIndex) {
+                        if (listener != null) {
+                            listener.onLetterUpdate(LETTERS[index]);
+                        }
+                        Log.d(TAG, "onTouchEvent: " + LETTERS[index]);
+
+                        touchIndex = index;
+                    }
+                }
+
+                break;
+            case MotionEvent.ACTION_MOVE:
+                index = (int) (event.getY() / cellHeight);
+                if (index >= 0 && index < LETTERS.length) {
+                    // 判断是否跟上一次触摸到的一样
+                    if (index != touchIndex) {
+
+                        if (listener != null) {
+                            listener.onLetterUpdate(LETTERS[index]);
+                        }
+                        Log.d(TAG, "onTouchEvent: " + LETTERS[index]);
+
+                        touchIndex = index;
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                touchIndex = -1;
+                break;
+
+            default:
+                break;
+        }
+        invalidate();
+
+        return true;
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        // 获取单元格的宽和高
+
+        cellWidth = getMeasuredWidth();
+
+        int mHeight = getMeasuredHeight();
+        cellHeight = mHeight * 1.0f / LETTERS.length;
+
+    }
+}
+
