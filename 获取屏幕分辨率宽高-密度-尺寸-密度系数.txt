@@ -1,8 +1,0 @@
-//测量屏幕的工具
-DisplayMetrics metrics = this.getResources().getDisplayMetrics();
-int widthPixels = metrics.widthPixels;//屏幕宽度
-int heightPixels = metrics.heightPixels;//屏幕高度
-float density = metrics.density;//屏幕系数
-int densityDpi = metrics.densityDpi;//屏幕密度
-//计算屏幕尺寸（屏幕宽*屏幕宽+屏幕高*屏幕高）开根号/屏幕密度
-float size = (float) (Math.sqrt(widthPixels*widthPixels+heightPixels*heightPixels)/densityDpi);
