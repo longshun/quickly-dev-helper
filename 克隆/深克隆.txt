@@ -1,0 +1,45 @@
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+//浅克隆 实现了基本数据类型的拷贝，但是对于引用类型（对象类型）的话，Obj1和克隆出来的Obj2引用数据类型指向的是同一个对象；
+//深克隆就是把 对象中的引用数据类型重新拷贝一份；
+//通过把对象先读取到内存中，再从内存中取出来，实现对象的深克隆；
+//前提，对象实现了Serializable接口；
+//工具类 实现类对象的深克隆
+public class CloneUtil {
+	@SuppressWarnings("unchecked")
+	public static <T> T cloneTo(T src) throws RuntimeException {
+		ByteArrayOutputStream memoryBuffer = new ByteArrayOutputStream();
+		ObjectOutputStream out = null;
+		ObjectInputStream in = null;
+		T dist = null;
+		try {
+			out = new ObjectOutputStream(memoryBuffer);
+			out.writeObject(src);
+			out.flush();
+			in = new ObjectInputStream(new ByteArrayInputStream(memoryBuffer.toByteArray()));
+			dist = (T) in.readObject();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} finally {
+			if (out != null)
+				try {
+					out.close();
+					out = null;
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			if (in != null)
+				try {
+					in.close();
+					in = null;
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+		}
+		return dist;
+	}
+}
