@@ -19,14 +19,12 @@ public abstract class BaseActivity extends FragmentActivity implements View.OnCl
         
 		//父类有全局布局
 		super.setContentView(R.layout.layout_base);
-		
 		//初始化父类布局
 		initBaseView();
 		
 		
 		//父类没有全局布局
         this.setContentView(this.getLayoutId());
-		
 		//模板模式
         this.initView();
         this.initListener();
@@ -78,8 +76,18 @@ public abstract class BaseActivity extends FragmentActivity implements View.OnCl
     }
 
 	//实现接口方法
-    public void onClick(View var1) {
+    public void onClick(View v) {
 		//点击事件交给自己处理
-        this.onClick(var1.getId());
+		if (!fastClick())
+            onClick(v);
+    }
+	
+	private long lastClick = 0;
+    private boolean fastClick() {
+        if (System.currentTimeMillis() - lastClick <= 1000) {
+            return true;
+        }
+        lastClick = System.currentTimeMillis();
+        return false;
     }
 }
