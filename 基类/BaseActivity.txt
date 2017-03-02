@@ -1,0 +1,85 @@
+
+
+//1.初始化全局布局
+//2.注册网络变化的广播接受者
+//3.全局的提示信息
+
+
+public abstract class BaseActivity extends FragmentActivity implements View.OnClickListener {
+
+    public BaseActivity() {
+    }
+
+    protected void onCreate(Bundle var1) {
+	
+		super.onCreate(var1);
+	
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        
+		//父类有全局布局
+		super.setContentView(R.layout.layout_base);
+		
+		//初始化父类布局
+		initBaseView();
+		
+		
+		//父类没有全局布局
+        this.setContentView(this.getLayoutId());
+		
+		//模板模式
+        this.initView();
+        this.initListener();
+        this.initData();
+    }
+	
+	//父类有全局布局
+	@Override
+    public void setContentView(View view) {
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 1);
+        mContentView.addView(view, lp);
+    }
+
+	//父类有全局布局
+    @Override
+    public void setContentView(int layoutResID) {
+        View view = LayoutInflater.from(this).inflate(layoutResID, null);
+        setContentView(view);
+    }
+	
+
+	//父类没有全局布局
+	//子类必须实现，返回布局文件R.layout.activity_main
+    public abstract int getLayoutId();
+
+	//子类选择实现
+    public void initView() {
+    }
+	
+	//子类选择实现
+    public void initBaseView() {
+		mHeaderView = findViewById(xxx);
+		mContentView = findViewById(xxx);
+		mFooterView = findViewById(xxx);
+    }
+	
+	//子类选择实现
+    public void initListener() {
+    }
+	
+	子类选择实现
+    protected void initData() {
+    }
+
+	//子类选择实现
+    public void onClick(int var1) {
+		
+    }
+
+	//实现接口方法
+    public void onClick(View var1) {
+		//点击事件交给自己处理
+        this.onClick(var1.getId());
+    }
+}
