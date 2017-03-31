@@ -1,3 +1,7 @@
+		
+		出现弹框，弹框上出现选项，出发点击事件，类似optionmenu
+		
+		
 		String[] items1;
         items1 = new String[]{"删除","置顶")};
 
