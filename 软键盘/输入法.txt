@@ -4,7 +4,13 @@
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(etSearch.getWindowToken(), 0);
 				
+				InputMethodManager mInputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+				mInputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+				
 				//ËÑË÷¿ò
 				etSearch = (EditText) findViewById(R.id.et_search_store);
 				etSearch.requestFocus();//×Ô¶¯Ìø³öÈí¼üÅÌ
+				
+				
+				
 				

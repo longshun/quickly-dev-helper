@@ -1,0 +1,8 @@
+		String[] items1;
+        items1 = new String[]{"删除","置顶")};
+
+        OptionsPopupDialog.newInstance(view.getContext(), items1).setOptionsPopupDialogListener(new OptionsPopupDialog.OnOptionsItemClickedListener() {
+            public void onOptionsItemClicked(int which) {
+                //响应点击事件
+            }
+        }).show();
